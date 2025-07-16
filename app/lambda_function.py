@@ -15,7 +15,18 @@ MAX_FILE_SIZE = 6 * 1024 * 1024  # 6 MB
 def lambda_handler(event, context):
     print("event:", event) 
     try:
-        encoded_pdf = event.get("pdf_base64")
+        body = event.get("body")
+
+        if event.get("isBase64Encoded"):
+            body = base64.b64decode(body).decode("utf-8")
+
+        try:
+            body_json = json.loads(body)
+        except Exception as e:
+            logger.error(f"Cuerpo JSON inválido: {e}")
+            return _response(400, {"error": "Cuerpo JSON inválido"})
+
+        encoded_pdf = body_json.get("pdf_base64")
 
         if not encoded_pdf:
             logger.warning("Campo 'pdf_base64' ausente en la petición.")
