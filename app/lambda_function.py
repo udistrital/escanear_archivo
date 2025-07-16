@@ -13,6 +13,7 @@ logger.setLevel(logging.INFO)
 MAX_FILE_SIZE = 6 * 1024 * 1024  # 6 MB
 
 def lambda_handler(event, context):
+    print("event:", event) 
     try:
         encoded_pdf = event.get("pdf_base64")
 
