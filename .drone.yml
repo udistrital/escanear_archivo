@@ -18,7 +18,7 @@ steps:
       - release
   when:
     branch:
-      - release/*
+      - master/*
     event:
       - push
 
@@ -36,9 +36,9 @@ steps:
     LAMBDA_NAME_TEST:
       from_secret: lambda_name_test
   commands:
-    - export ECR_URI=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$DRONE_REPO_NAME
+    - export ECR_URI=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/$DRONE_REPO_NAME
     - aws lambda update-function-code \
-        --function-name $LAMBDA_NAME_TEST \
+        --function-name ${LAMBDA_NAME_TEST} \
         --image-uri $ECR_URI:release
   when:
     branch:
