@@ -17,7 +17,7 @@ import (
 
 const (
 	MaxFileSize = 6 * 1024 * 1024 // 6 MB
-	ScanTimeout = 120 * time.Second
+	ScanTimeout = 1200 * time.Second
 )
 
 type RequestBody struct {
