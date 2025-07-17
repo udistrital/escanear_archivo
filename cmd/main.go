@@ -17,7 +17,7 @@ import (
 
 const (
 	MaxFileSize = 6 * 1024 * 1024 // 6 MB
-	ScanTimeout = 1200 * time.Second
+	ScanTimeout = 120 * time.Second
 )
 
 type RequestBody struct {
@@ -104,8 +104,6 @@ func main() {
 
 	cmd := exec.CommandContext(ctxScan, "clamscan", "--no-summary", tempFile.Name())
 	output, err := cmd.CombinedOutput()
- 	log.Println("output: ", string(output))
-	log.Println("err: ", err)
 
 	if ctxScan.Err() == context.DeadlineExceeded {
 		log.Println("Timeout del escaneo")
@@ -217,6 +215,8 @@ func handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 
 	cmd := exec.CommandContext(ctxScan, "clamscan", "--no-summary", tempFile.Name())
 	output, err := cmd.CombinedOutput()
+	log.Println("output: ", string(output))
+	log.Println("err: ", err)
 
 	if ctxScan.Err() == context.DeadlineExceeded {
 		log.Println("⏰ Tiempo de espera agotado para clamscan")
@@ -261,4 +261,5 @@ func safeRemove(path string) {
 		log.Printf("No se pudo eliminar %s: %v", path, err)
 	}
 }
+
 
