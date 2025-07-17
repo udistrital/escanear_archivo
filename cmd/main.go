@@ -104,6 +104,8 @@ func main() {
 
 	cmd := exec.CommandContext(ctxScan, "clamscan", "--no-summary", tempFile.Name())
 	output, err := cmd.CombinedOutput()
+ 	log.Println("output: ", string(output))
+	log.Println("err: ", err)
 
 	if ctxScan.Err() == context.DeadlineExceeded {
 		log.Println("Timeout del escaneo")
