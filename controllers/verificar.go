@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/udistrital/verificar_archivo_mid/services"
-	"github.com/udistrital/verificar_archivo_mid/models"
+	"github.com/udistrital/funcion_lambda_verificar_archivo/models"
+	"github.com/udistrital/funcion_lambda_verificar_archivo/services"
 	"github.com/udistrital/utils_oas/errorhandler"
+
 	//"github.com/udistrital/utils_oas/requestresponse"
 	//"fmt"
 	"encoding/json"
