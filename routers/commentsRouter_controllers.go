@@ -7,13 +7,13 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/udistrital/verificar_archivo_mid/controllers:VerificarController"] = append(beego.GlobalControllerRouter["github.com/udistrital/verificar_archivo_mid/controllers:VerificarController"],
-        beego.ControllerComments{
-            Method: "PostVerificar",
-            Router: "/",
-            AllowHTTPMethods: []string{"post"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
+	beego.GlobalControllerRouter["github.com/udistrital/funcion_lambda_verificar_archivo/controllers:VerificarController"] = append(beego.GlobalControllerRouter["github.com/udistrital/funcion_lambda_verificar_archivo/controllers:VerificarController"],
+		beego.ControllerComments{
+			Method:           "PostVerificar",
+			Router:           "/",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
 
 }

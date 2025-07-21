@@ -4,7 +4,7 @@
 package routers
 
 import (
-	"github.com/udistrital/verificar_archivo_mid/controllers"
+	"github.com/udistrital/funcion_lambda_verificar_archivo/controllers"
 	"github.com/udistrital/utils_oas/errorhandler"
 
 	"github.com/astaxie/beego"
