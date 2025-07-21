@@ -16,7 +16,6 @@ steps:
   commands:
   - go mod init
   - go mod tidy
-  - GOOS=linux GOARCH=amd64 go build -o main
   when:
     branch:
     - develop
