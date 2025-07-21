@@ -1,0 +1,73 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Verificación externa de firma digital",
+        "description": "Microservicio MID para verificar archivos con firma digital",
+        "version": "1.0.0",
+        "contact": {}
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/verificar/": {
+            "post": {
+                "tags": [
+                    "verificar"
+                ],
+                "description": "Verifica si un archivo tiene virus.",
+                "operationId": "VerificarController.PostVerificar",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Datos de verificación",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.VerificarRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/map[string]interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "body is empty or invalid"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "map[string]interface{}": {
+            "title": "map[string]interface{}",
+            "type": "object"
+        },
+        "models.VerificarRequest": {
+            "title": "VerificarRequest",
+            "type": "object",
+            "properties": {
+                "firma": {
+                    "type": "string"
+                },
+                "pdf_base64": {
+                    "type": "string"
+                },
+                "urlFileUp": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "verificar",
+            "description": "VerificarController operations for Verificar\n"
+        }
+    ]
+}
