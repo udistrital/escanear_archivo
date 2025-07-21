@@ -7,8 +7,8 @@
 verificacion_firma_digital_mid
 main
 
-go.mod
-go.sum
+*go.mod
+*go.sum
 
 # Variables de entorno - ignorar todas
 *.env
