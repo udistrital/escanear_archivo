@@ -1,43 +1,77 @@
-kind: pipeline
-name: oati_golang_api_ci
-
 workspace:
   base: /go
-  path: src/github.com/${DRONE_REPO}
-
-steps:
-- name: build
-  image: golang:1.24
-  commands:
-    - go mod init
-    - go get -t
-    - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main
+  path: src/github.com/udistrital/${DRONE_REPO##udistrital/}
   when:
-    branch:
+      branch:
       - develop
       - release/*
-      - feature/*
       - master
+
+kind: pipeline
+name: oas_api_ci
+
+steps:
+- name: go_build
+  image: golang:1.24
+  commands:
+  - go mod init
+  - go mod tidy
+  when:
+    branch:
+    - develop
+    - release/*
+    - feature/*
+    - master
     event:
-      - push
-  
+    - push
+
+- name: run_sonar_scanner
+  image: aosapps/drone-sonar-plugin
+  settings:
+    sonar_host:
+      from_secret: SONAR_HOST
+    sonar_token:
+      from_secret: SONAR_TOKEN
+  when:
+    branch:
+    - develop
+    - feature/*
+    - release/*
+
 - name: publish_to_ecr_release
   image: plugins/ecr
   settings:
     access_key:
       from_secret: AWS_ACCESS_KEY_ID
-    create_repository: true
     secret_key:
       from_secret: AWS_SECRET_ACCESS_KEY
     region:
       from_secret: AWS_REGION
-    repo: ${DRONE_REPO_NAME}
+    repo: ${DRONE_REPO##udistrital/}
     tags:
       - ${DRONE_COMMIT:0:7}
       - release
   when:
     branch:
-      - release/*
+    - release/*
     event:
-      - push
+    - push
 
+- name: publish_to_ecr_master
+  image: plugins/ecr
+  settings:
+    access_key:
+      from_secret: AWS_ACCESS_KEY_ID
+    secret_key:
+      from_secret: AWS_SECRET_ACCESS_KEY
+    region:
+      from_secret: AWS_REGION
+    repo: ${DRONE_REPO##udistrital/}
+    tags:
+      - ${DRONE_COMMIT:0:7}
+      - latest
+  when:
+    branch:
+    - master
+    event:
+    - push
