@@ -9,20 +9,9 @@ import (
 	"github.com/udistrital/utils_oas/auditoria"
 	"github.com/udistrital/utils_oas/xray"
 
-	"fmt"
-	"runtime"
-	"time"
 )
 
 func main() {
-
-	var mem runtime.MemStats
-
-	for {
-		runtime.ReadMemStats(&mem)
-		fmt.Printf("Memoria usada: %.2f MB\n", float64(mem.Alloc)/1024/1024)
-		time.Sleep(20 * time.Second)
-	}
 
 	AllowedOrigins := []string{"*.udistrital.edu.co"}
 	if beego.BConfig.RunMode == "dev" {
