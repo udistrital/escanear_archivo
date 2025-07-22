@@ -65,7 +65,7 @@ steps:
     cluster: test
     aws_access_key_id: ${AWS_ACCESS_KEY_ID}
     aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
-    image_tag: release
+    image_name: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${DRONE_REPO_NAME}:release
     region: ${AWS_REGION}
     service: ${DRONE_REPO_NAME}_test
   environment:
@@ -75,3 +75,5 @@ steps:
       from_secret: AWS_SECRET_ACCESS_KEY
     AWS_REGION:
       from_secret: AWS_REGION
+    AWS_ACCOUNT_ID:
+      from_secret: aws_account_id
