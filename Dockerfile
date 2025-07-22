@@ -1,15 +1,19 @@
 FROM alpine:latest
 
-RUN yum install -y clamav clamav-update clamav-lib && \
-    yum clean all && \
-    rm -rf /var/cache/yum
+# Instalar ClamAV y herramientas necesarias
+RUN apk add --no-cache clamav clamav-lib clamav-daemon clamav-libunrar curl
 
-RUN freshclam || true
+# Actualizar las firmas de virus
+RUN freshclam
 
-COPY --from=builder /app/main /main
-COPY entrypoint.sh /entrypoint.sh
-COPY conf/app.conf /conf/app.conf
+WORKDIR /
 
-RUN chmod +x /main /entrypoint.sh
+# Copiar binario de la API
+COPY main main
+COPY conf/app.conf conf/app.conf
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Asignar permisos de ejecución
+RUN chmod +x main
+
+# Ejecutar la API
+ENTRYPOINT ["/main"]
