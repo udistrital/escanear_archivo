@@ -1,3 +1,4 @@
+/*
 package services
 
 import (
@@ -81,4 +82,107 @@ func safeRemove(path string) {
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Printf("⚠️ No se pudo eliminar %s: %v", path, err)
 	}
+}
+*/
+
+package services
+
+import (
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"time"
+)
+
+const (
+	MaxFileSize   = 6 * 1024 * 1024 // 6 MB
+	ScanTimeout   = 120 * time.Second
+	TempScanDir   = "./files"
+	ClamscanCheck = "clamscan"
+)
+
+type LambdaResponse struct {
+	Status    string `json:"status"`     // "clean", "infected", o "error"
+	RawOutput string `json:"raw_output"` // salida de ClamAV
+}
+
+func VerificarArchivo(pdfBase64 string) (*LambdaResponse, error) {
+	log.Println("🔍 Verificando si 'clamscan' está disponible...")
+
+	if _, err := exec.LookPath(ClamscanCheck); err != nil {
+		log.Printf("❌ 'clamscan' no está instalado o no está en el PATH: %v", err)
+		return &LambdaResponse{
+			Status:    "error",
+			RawOutput: "'clamscan' no disponible en el entorno",
+		}, nil
+	}
+
+	log.Println("✅ 'clamscan' disponible.")
+	log.Println("🔍 Decodificando base64...")
+
+	pdfBytes, err := base64.StdEncoding.DecodeString(pdfBase64)
+	if err != nil {
+		log.Printf("❌ Error decodificando base64: %v", err)
+		return &LambdaResponse{
+			Status:    "error",
+			RawOutput: "Base64 inválido",
+		}, nil
+	}
+
+	log.Printf("📦 Tamaño del PDF: %.2f KB", float64(len(pdfBytes))/1024)
+	if len(pdfBytes) > MaxFileSize {
+		log.Printf("🚫 Excede el tamaño máximo (%d bytes)", MaxFileSize)
+		return &LambdaResponse{
+			Status:    "error",
+			RawOutput: "Archivo demasiado grande (máx 6MB)",
+		}, nil
+	}
+
+	// Crear carpeta ./files si no existe
+	if err := os.MkdirAll(TempScanDir, 0755); err != nil {
+		log.Printf("❌ No se pudo crear directorio %s: %v", TempScanDir, err)
+		return nil, errors.New("error creando directorio de archivos")
+	}
+
+	// Crear archivo temporal en ./files con nombre único
+	timestamp := time.Now().UnixNano()
+	tempFilePath := filepath.Join(TempScanDir, fmt.Sprintf("scan_%d.pdf", timestamp))
+	if err := os.WriteFile(tempFilePath, pdfBytes, 0644); err != nil {
+		log.Printf("❌ Error escribiendo archivo %s: %v", tempFilePath, err)
+		return nil, errors.New("error escribiendo archivo temporal")
+	}
+	log.Printf("📁 Archivo temporal guardado en: %s", tempFilePath)
+
+	// Ejecutar clamscan con timeout
+	cmd := exec.Command("timeout", fmt.Sprintf("%ds", int(ScanTimeout.Seconds())), "clamscan", "--no-summary", tempFilePath)
+	output, err := cmd.CombinedOutput()
+
+	log.Println("📤 Resultado de clamscan:\n", string(output))
+
+	exitCode := cmd.ProcessState.ExitCode()
+	log.Printf("📊 Exit code de clamscan: %d", exitCode)
+
+	status := "error"
+	switch exitCode {
+	case 0:
+		status = "clean"
+	case 1:
+		status = "infected"
+	default:
+		status = "error"
+		if err != nil {
+			log.Printf("⚠️ Error al ejecutar clamscan: %v", err)
+		}
+	}
+
+	log.Printf("✅ Resultado final: %s", status)
+
+	return &LambdaResponse{
+		Status:    status,
+		RawOutput: string(output),
+	}, nil
 }
