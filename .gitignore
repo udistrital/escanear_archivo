@@ -4,7 +4,7 @@
 *.zip
 *.exe
 *~
-verificacion_firma_digital_mid
+funcion_lambda_verificar_archivo
 main
 
 # Variables de entorno - ignorar todas
