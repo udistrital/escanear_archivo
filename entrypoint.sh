@@ -3,16 +3,15 @@
 echo "🚀 Iniciando clamd en segundo plano..."
 clamd --foreground &
 
-# Esperar un segundo por si crashea al instante
 sleep 1
 
-# Verificar si clamd murió
+# Verificar si clamd murió inmediatamente
 if ! pgrep -x clamd > /dev/null; then
-  echo "❌ clamd murió. Mostrando log:"
+  echo "❌ clamd murió. Mostrando log (si existe)..."
   if [ -f /var/log/clamav/clamd.log ]; then
     cat /var/log/clamav/clamd.log
   else
-    echo "⚠️ Log no encontrado. ¿Quizás clamd nunca arrancó por falta de base de datos?"
+    echo "⚠️ Log no encontrado. ¿Tal vez clamd no arrancó por falta de base de datos?"
   fi
   exit 1
 fi
@@ -26,5 +25,11 @@ for i in $(seq 1 20); do
     sleep 1
 done
 
-exec /main
+# Verifica por si el socket nunca apareció
+if ! clamdscan --version > /dev/null 2>&1; then
+    echo "❌ clamd no respondió después de 20s. Mostrando log:"
+    cat /var/log/clamav/clamd.log || echo "No se pudo leer el log"
+    exit 1
+fi
 
+exec /main
