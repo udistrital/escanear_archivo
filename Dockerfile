@@ -25,7 +25,7 @@ RUN echo "LogSyslog yes" > /etc/clamav/clamd.conf && \
     echo "ScanPDF yes" >> /etc/clamav/clamd.conf && \
     echo "LogFile /var/log/clamav/clamd.log" >> /etc/clamav/clamd.conf
 
-RUN freshclam || true
+RUN freshclam 
 
 # Copiar binario desde etapa anterior
 COPY --from=builder /app/main /main
