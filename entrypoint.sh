@@ -3,9 +3,9 @@
 echo "🚀 Iniciando clamd en segundo plano..."
 clamd --foreground &
 
-echo "⏳ Esperando a que clamd esté listo..."
+echo "⏳ Esperando a que clamd cree el socket..."
 for i in $(seq 1 20); do
-    if clamdscan --version > /dev/null 2>&1; then
+    if [ -S /run/clamav/clamd.sock ]; then
         echo "✅ clamd listo. Iniciando servicio Go..."
         break
     fi
