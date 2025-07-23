@@ -34,6 +34,8 @@ steps:
     tags:
       - ${DRONE_COMMIT:0:7}
       - release
+    dockerfile: Dockerfile  # Usa tu Dockerfile personalizado
+    context: .              # Usa el contexto raíz del repo
   when:
     branch:
       - release/*
@@ -53,6 +55,8 @@ steps:
     tags:
       - ${DRONE_COMMIT:0:7}
       - latest
+    dockerfile: Dockerfile  # Usa tu Dockerfile personalizado
+    context: .              # Usa el contexto raíz del repo
   when:
     branch:
       - master
