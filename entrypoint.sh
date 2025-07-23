@@ -26,5 +26,4 @@ for i in $(seq 1 20); do
     sleep 1
 done
 
-exec /main
-
+exec /main 
