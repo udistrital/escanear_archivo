@@ -18,7 +18,7 @@ steps:
     - feature/*
     - master
     event:
-    - push  
+    - push
 
 - name: publish_to_ecr_release
   image: plugins/ecr
@@ -34,8 +34,6 @@ steps:
     tags:
       - ${DRONE_COMMIT:0:7}
       - release
-    dockerfile: Dockerfile  # Usa tu Dockerfile personalizado
-    context: .              # Usa el contexto raíz del repo
   when:
     branch:
       - release/*
@@ -55,8 +53,6 @@ steps:
     tags:
       - ${DRONE_COMMIT:0:7}
       - latest
-    dockerfile: Dockerfile  # Usa tu Dockerfile personalizado
-    context: .              # Usa el contexto raíz del repo
   when:
     branch:
       - master
@@ -73,18 +69,8 @@ steps:
     AWS_DEFAULT_REGION:
       from_secret: AWS_REGION
   commands:
-    - case ${DRONE_BRANCH} in
-      master)
-      SUFFIX=prod
-      CLUSTER=oas
-        ;;
-      *)
-      SUFFIX=test
-      CLUSTER=test
-        ;;
-      esac
     - aws ecs update-service
-      --cluster $${CLUSTER}
-      --service $${DRONE_REPO_NAME}_$${SUFFIX}
+      --cluster aplicaciones
+      --service $${DRONE_REPO_NAME}
       --force-new-deployment
       --query "service.deployments[0].id"
