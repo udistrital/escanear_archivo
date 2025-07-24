@@ -17,6 +17,7 @@ RUN mkdir -p /run/clamav /var/run/clamav /var/lib/clamav /etc/clamav /var/log/cl
 
 # Configuración básica de clamd
 COPY src/clamd.conf /etc/clamav/clamd.conf
+COPY src/freshclam.conf /etc/clamav/freshclam.conf
 
 # Descargar las firmas ahora para evitar depender del entorno
 RUN freshclam --verbose

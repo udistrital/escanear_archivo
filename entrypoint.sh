@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "🚀 Iniciando clamd en segundo plano..."
+freshclam -d &
 clamd --foreground &
 
 echo "[+] Esperando a que ClamAV esté listo..."
