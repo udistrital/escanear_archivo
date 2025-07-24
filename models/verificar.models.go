@@ -5,3 +5,8 @@ type VerificarRequest struct {
 	Firma     string `json:"firma"`
 	UrlFileUp string `json:"urlFileUp"`
 }
+
+type RequestResponse struct {
+	Status    string `json:"status"`     // "clean", "infected", o "error"
+	RawOutput string `json:"raw_output"` 
+}

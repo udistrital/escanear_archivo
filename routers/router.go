@@ -1,10 +1,10 @@
 // @APIVersion 1.0.0
-// @Title Verificación externa de firma digital
-// @Description Microservicio MID para verificar archivos con firma digital
+// @Title Verificación de virus en archivos
+// @Description Microservicio MID para verificar virus en archivos
 package routers
 
 import (
-	"github.com/udistrital/funcion_lambda_verificar_archivo/controllers"
+	"github.com/udistrital/escanear_archivo/controllers"
 	"github.com/udistrital/utils_oas/errorhandler"
 
 	"github.com/astaxie/beego"

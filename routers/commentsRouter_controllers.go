@@ -7,7 +7,7 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/udistrital/funcion_lambda_verificar_archivo/controllers:VerificarController"] = append(beego.GlobalControllerRouter["github.com/udistrital/funcion_lambda_verificar_archivo/controllers:VerificarController"],
+    beego.GlobalControllerRouter["github.com/udistrital/escanear_archivo/controllers:VerificarController"] = append(beego.GlobalControllerRouter["github.com/udistrital/escanear_archivo/controllers:VerificarController"],
         beego.ControllerComments{
             Method: "PostVerificar",
             Router: "/",

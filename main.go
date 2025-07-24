@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "github.com/udistrital/funcion_lambda_verificar_archivo/routers"
+	_ "github.com/udistrital/escanear_archivo/routers"
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 
 	"github.com/astaxie/beego"

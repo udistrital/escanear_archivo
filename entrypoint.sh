@@ -2,7 +2,7 @@
 
 echo "🚀 Iniciando clamd en segundo plano..."
 freshclam -d &
-clamd --foreground &
+clamd &
 
 echo "[+] Esperando a que ClamAV esté listo..."
 CLAMD_SOCKET="/run/clamav/clamd.sock"
@@ -20,7 +20,6 @@ while [ ! -S "$CLAMD_SOCKET" ]; do
 done
 
 echo "[✓] ClamAV está listo."
-echo "[+] Iniciando API"
 
 exec /main
 

@@ -5,20 +5,20 @@
 *.exe
 *~
 funcion_lambda_verificar_archivo
+escanear_archivo
 main
 
-# Variables de entorno - ignorar todas
 *.env
-# Excepto una plantilla
+
 !.template.env
-# y el env_file que importaría docker-compose
+
 !.develop.env
 
-# IDEs y otros
 .vscode/
 .scannerwork/
 
-# Swagger
 swagger/**
 !swagger/swagger.json
 !swagger/swagger.yml
+
+lastupdate.tmp

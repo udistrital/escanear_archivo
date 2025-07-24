@@ -1,4 +1,4 @@
-module github.com/udistrital/funcion_lambda_verificar_archivo
+module github.com/udistrital/escanear_archivo
 
 go 1.22
 

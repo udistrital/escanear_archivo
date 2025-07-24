@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/udistrital/funcion_lambda_verificar_archivo/models"
-	"github.com/udistrital/funcion_lambda_verificar_archivo/services"
+	"github.com/udistrital/escanear_archivo/models"
+	"github.com/udistrital/escanear_archivo/services"
 	"github.com/udistrital/utils_oas/errorhandler"
-
-	//"github.com/udistrital/utils_oas/requestresponse"
-	//"fmt"
 	"encoding/json"
 )
 
@@ -33,7 +30,7 @@ func (c *VerificarController) PostVerificar() {
 
 	var payload models.VerificarRequest
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &payload); err != nil {
-		res := buildLambdaFormatResponse(400, services.LambdaResponse{
+		res := buildLambdaFormatResponse(400, models.RequestResponse{
 			Status:    "error",
 			RawOutput: "Error al parsear el body: " + err.Error(),
 		})
@@ -44,7 +41,7 @@ func (c *VerificarController) PostVerificar() {
 	}
 
 	if payload.PdfBase64 == "" {
-		res := buildLambdaFormatResponse(400, services.LambdaResponse{
+		res := buildLambdaFormatResponse(400, models.RequestResponse{
 			Status:    "error",
 			RawOutput: "No se encontraron datos PDF en la solicitud",
 		})
@@ -56,7 +53,7 @@ func (c *VerificarController) PostVerificar() {
 
 	resp, err := services.VerificarArchivo(payload.PdfBase64)
 	if err != nil {
-		res := buildLambdaFormatResponse(500, services.LambdaResponse{
+		res := buildLambdaFormatResponse(500, models.RequestResponse{
 			Status:    "error",
 			RawOutput: "Error interno al verificar archivo: " + err.Error(),
 		})
@@ -72,7 +69,7 @@ func (c *VerificarController) PostVerificar() {
 	c.ServeJSON()
 }
 
-func buildLambdaFormatResponse(statusCode int, response services.LambdaResponse) map[string]interface{} {
+func buildLambdaFormatResponse(statusCode int, response models.RequestResponse) map[string]interface{} {
 	bodyBytes, _ := json.Marshal(response)
 	return map[string]interface{}{
 		"statusCode": statusCode,
