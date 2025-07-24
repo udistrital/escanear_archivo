@@ -14,7 +14,7 @@ RUN mkdir -p /run/clamav /var/run/clamav /var/lib/clamav /etc/clamav /var/log/cl
 COPY src/clamd.conf /etc/clamav/clamd.conf
 COPY src/freshclam.conf /etc/clamav/freshclam.conf
 
-RUN freshclam 
+RUN freshclam --verbose
 
 COPY --from=builder /app/main /main
 COPY conf/app.conf /conf/app.conf
