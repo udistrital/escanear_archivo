@@ -2,7 +2,7 @@
 
 echo "🚀 Iniciando clamd en segundo plano..."
 freshclam -d &
-clamd &
+clamd --foreground &
 
 echo "[+] Esperando a que ClamAV esté listo..."
 CLAMD_SOCKET="/run/clamav/clamd.sock"
