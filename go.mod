@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/astaxie/beego v1.12.3
-	github.com/udistrital/utils_oas v0.0.0-20250618194922-b7eea7a9bf62
+	github.com/udistrital/utils_oas v0.0.0-20250725040446-359441f29002
 )
 
 require (

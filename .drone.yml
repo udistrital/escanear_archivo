@@ -14,9 +14,7 @@ steps:
   when:
     branch:
     - develop
-    - release/*
     - feature/*
-    - master
     event:
     - push
 
@@ -74,3 +72,9 @@ steps:
       --service $${DRONE_REPO_NAME}
       --force-new-deployment
       --query "service.deployments[0].id"
+  when:
+    branch:
+      - release/*
+      - master
+    event:
+      - push
