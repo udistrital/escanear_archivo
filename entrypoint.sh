@@ -6,7 +6,7 @@ clamd --foreground &
 
 echo "[+] Esperando a que ClamAV esté listo..."
 CLAMD_SOCKET="/run/clamav/clamd.sock"
-MAX_TRIES=60
+MAX_TRIES=90
 TRIES=0
 
 while [ ! -S "$CLAMD_SOCKET" ]; do
