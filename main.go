@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/udistrital/escanear_archivo/controllers"
 	_ "github.com/udistrital/escanear_archivo/routers"
-	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
 	"github.com/udistrital/utils_oas/auditoria"
 	"github.com/udistrital/utils_oas/xray"
-
 )
 
 func main() {
@@ -34,9 +33,8 @@ func main() {
 	}))
 
 	xray.InitXRay()
-	apistatus.Init()
+	controllers.InitHealthCheck()
 	auditoria.InitMiddleware()
 	beego.Run()
 
-	
 }

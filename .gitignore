@@ -4,7 +4,6 @@
 *.zip
 *.exe
 *~
-funcion_lambda_verificar_archivo
 escanear_archivo
 main
 
