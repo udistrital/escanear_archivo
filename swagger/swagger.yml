@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Verificación externa de firma digital
-  description: Microservicio MID para verificar archivos con firma digital
+  title: Verificación de virus en archivos
+  description: Microservicio MID para verificar virus en archivos
   version: 1.0.0
 basePath: /v1
 paths:
@@ -17,9 +17,7 @@ paths:
         description: Datos de verificación
         required: true
         schema:
-          type: array
-          items:
-            $ref: '#/definitions/models.VerificarRequest'
+          $ref: '#/definitions/models.VerificarRequest'
       responses:
         "200":
           description: ""
