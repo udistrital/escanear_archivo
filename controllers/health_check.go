@@ -3,18 +3,12 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/escanear_archivo/services"
 )
-
-var checkCount uint
-
-func clearCheck() {
-	checkCount = 0
-}
 
 func statusResponse(status string) map[string]interface{} {
 	return map[string]interface{}{
@@ -33,7 +27,6 @@ func formatErrorResponse(errorMsg interface{}) map[string]interface{} {
 // InitWithHandler accepts a (handler) function that, once performs the
 // healthcheck, returns "nil" when everything is OK.
 func InitWithHandler(statusCheckHandler func() (statusCheckError interface{})) {
-	clearCheck()
 	beego.Get("/", func(ctx *context.Context) {
 		var responseError interface{}
 
@@ -47,25 +40,17 @@ func InitWithHandler(statusCheckHandler func() (statusCheckError interface{})) {
 			// "finally"
 			response := defaultStatusResponse
 			if responseError != nil {
-				clearCheck()
-				logs.Critical(defaultErrorString, responseError)
 				response = formatErrorResponse(responseError)
 				ctx.Output.SetStatus(http.StatusServiceUnavailable) // 503
 			}
 
-			socketPath := "/run/clamav/clamd.sock"
-			_, err := os.Stat(socketPath)
-			if err != nil {
-				clearCheck()
+			if err := services.PingClamd(); err != nil {
 				logs.Critical(defaultErrorString, err)
 				response = formatErrorResponse(err)
 				ctx.Output.SetStatus(http.StatusServiceUnavailable)
 			}
 
-			response["checkCount"] = checkCount
 			ctx.Output.JSON(response, true, true)
-			logs.Debug("checkCount:", checkCount)
-			checkCount++
 		}()
 
 		// "try"

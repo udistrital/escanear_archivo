@@ -1,30 +1,33 @@
 package services
 
 import (
+	"bufio"
 	"encoding/base64"
+	"encoding/binary"
 	"fmt"
-	"log"
+	"net"
 	"os"
-	"os/exec"
-	"path/filepath"
+	"strings"
 	"time"
+
 	"github.com/udistrital/escanear_archivo/models"
 )
 
 const (
-	MaxFileSize     = 6 * 1024 * 1024 // 6 MB
-	TempScanDir     = "./files"
-	ClamAVScanCmd   = "clamdscan"     
+	MaxFileSize      = 6 * 1024 * 1024 // 6 MB
+	defaultClamdAddr = "127.0.0.1:3310"
+	clamdChunkSize   = 4096
+	clamdTimeout     = 30 * time.Second
 )
 
-func VerificarArchivo(pdfBase64 string) (*models.RequestResponse, error) {
-
-	if _, err := exec.LookPath(ClamAVScanCmd); err != nil {
-		return &models.RequestResponse{
-			Status:    "error",
-			RawOutput: "'clamdscan' no disponible en el entorno",
-		}, nil
+func clamdAddr() string {
+	if addr := os.Getenv("CLAMD_ADDR"); addr != "" {
+		return addr
 	}
+	return defaultClamdAddr
+}
+
+func VerificarArchivo(pdfBase64 string) (*models.RequestResponse, error) {
 
 	pdfBytes, err := base64.StdEncoding.DecodeString(pdfBase64)
 	if err != nil {
@@ -41,51 +44,100 @@ func VerificarArchivo(pdfBase64 string) (*models.RequestResponse, error) {
 		}, nil
 	}
 
-	if err := os.MkdirAll(TempScanDir, 0755); err != nil {
+	output, err := scanWithClamd(pdfBytes)
+	if err != nil {
 		return &models.RequestResponse{
 			Status:    "error",
-			RawOutput: "Error creando directorio temporal",
+			RawOutput: "No se pudo contactar clamd: " + err.Error(),
 		}, nil
 	}
-
-	timestamp := time.Now().UnixNano()
-	tempFilePath := filepath.Join(TempScanDir, fmt.Sprintf("scan_%d.pdf", timestamp))
-
-	if err := os.WriteFile(tempFilePath, pdfBytes, 0644); err != nil {
-
-		return &models.RequestResponse{
-			Status:    "error",
-			RawOutput: "Error escribiendo archivo temporal",
-		}, nil
-	}
-
-	defer func() {
-		if err := os.Remove(tempFilePath); err != nil {
-			time.Sleep(60 * time.Millisecond)
-			if errRetry := os.Remove(tempFilePath); errRetry != nil {
-				log.Printf("❌ Segundo intento fallido para eliminar archivo temporal: %v", errRetry)
-			} 
-		} 
-	}()
-	
-
-	cmd := exec.Command(ClamAVScanCmd, "--no-summary", tempFilePath)
-	output, err := cmd.CombinedOutput()
-
-	exitCode := cmd.ProcessState.ExitCode()
 
 	status := "error"
-	switch exitCode {
-	case 0:
-		status = "clean"
-	case 1:
+	switch {
+	case strings.HasSuffix(output, "FOUND"):
 		status = "infected"
-	default:
-		status = "error"
+	case strings.HasSuffix(output, "OK"):
+		status = "clean"
 	}
 
 	return &models.RequestResponse{
 		Status:    status,
-		RawOutput: string(output),
+		RawOutput: output,
 	}, nil
+}
+
+// scanWithClamd envía los bytes al daemon clamd usando el protocolo INSTREAM
+// sobre TCP y devuelve la línea de respuesta (p.ej. "stream: OK" o
+// "stream: Eicar-Test-Signature FOUND").
+func scanWithClamd(data []byte) (string, error) {
+	conn, err := net.DialTimeout("tcp", clamdAddr(), clamdTimeout)
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
+
+	if err := conn.SetDeadline(time.Now().Add(clamdTimeout)); err != nil {
+		return "", err
+	}
+
+	// Inicia la sesión de streaming.
+	if _, err := conn.Write([]byte("zINSTREAM\x00")); err != nil {
+		return "", err
+	}
+
+	// Envía el archivo en fragmentos con el formato <len uint32 BE><datos>.
+	for i := 0; i < len(data); i += clamdChunkSize {
+		end := i + clamdChunkSize
+		if end > len(data) {
+			end = len(data)
+		}
+		chunk := data[i:end]
+
+		var sizeBuf [4]byte
+		binary.BigEndian.PutUint32(sizeBuf[:], uint32(len(chunk)))
+		if _, err := conn.Write(sizeBuf[:]); err != nil {
+			return "", err
+		}
+		if _, err := conn.Write(chunk); err != nil {
+			return "", err
+		}
+	}
+
+	// Fragmento de longitud cero: marca el fin del stream.
+	if _, err := conn.Write([]byte{0, 0, 0, 0}); err != nil {
+		return "", err
+	}
+
+	// La respuesta termina en NUL.
+	resp, err := bufio.NewReader(conn).ReadString(0x00)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimRight(resp, "\x00\n"), nil
+}
+
+func PingClamd() error {
+	conn, err := net.DialTimeout("tcp", clamdAddr(), clamdTimeout)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	if err := conn.SetDeadline(time.Now().Add(clamdTimeout)); err != nil {
+		return err
+	}
+
+	if _, err := conn.Write([]byte("zPING\x00")); err != nil {
+		return err
+	}
+
+	buf := make([]byte, 16)
+	n, err := conn.Read(buf)
+	if err != nil {
+		return err
+	}
+	if !strings.Contains(string(buf[:n]), "PONG") {
+		return fmt.Errorf("respuesta inesperada de clamd: %q", string(buf[:n]))
+	}
+	return nil
 }

@@ -32,7 +32,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	xray.InitXRay()
+	xray.Init()
 	controllers.InitHealthCheck()
 	auditoria.InitMiddleware()
 	beego.Run()
